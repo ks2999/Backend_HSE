@@ -9,10 +9,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.util.List;
 import java.util.Map;
 
-/**
- * Защищаемые эндпоинты. Аутентификация берётся из JWT (cookie или Bearer),
- * роли проверяются через {@link PreAuthorize}.
- */
 @RestController
 public class ApiController {
 
@@ -21,7 +17,6 @@ public class ApiController {
         return "Публичный метод — доступен всем, без токена.";
     }
 
-    /** Текущий пользователь и его роли — данные взяты из токена. */
     @GetMapping("/me")
     public Map<String, Object> me(Authentication authentication) {
         List<String> roles = authentication.getAuthorities().stream()

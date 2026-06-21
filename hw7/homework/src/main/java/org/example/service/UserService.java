@@ -12,9 +12,9 @@ import java.util.List;
 @RequiredArgsConstructor
 @Transactional(readOnly = true)
 public class UserService {
-    
+
     private final UserRepository userRepository;
-    
+
     public List<User> getAllUsers() {
         return userRepository.findAll();
     }

@@ -19,15 +19,6 @@ import org.springframework.web.bind.annotation.RestController;
 import java.net.URI;
 import java.util.Map;
 
-/**
- * Вход и выход. Вместо создания серверной сессии (JSESSIONID) выдаём JWT.
- *
- * <ul>
- *   <li>{@code POST /login} — форма (browser): кладёт JWT в cookie и редиректит на /home.html;</li>
- *   <li>{@code POST /api/auth/login} — JSON (API): возвращает токен для заголовка Authorization;</li>
- *   <li>{@code GET /logout} — удаляет cookie с токеном (на сервере состояния нет).</li>
- * </ul>
- */
 @RestController
 public class AuthController {
 
@@ -43,7 +34,6 @@ public class AuthController {
         this.cookieName = cookieName;
     }
 
-    /** Обработка HTML-формы: успех -> cookie с JWT + редирект на главную; ошибка -> назад на форму. */
     @PostMapping(value = "/login", consumes = "application/x-www-form-urlencoded")
     public ResponseEntity<Void> formLogin(@RequestParam String username, @RequestParam String password) {
         try {
@@ -59,7 +49,6 @@ public class AuthController {
         }
     }
 
-    /** API-вход: возвращает токен в теле для использования в заголовке Authorization: Bearer. */
     @PostMapping(value = "/api/auth/login", consumes = "application/json")
     public ResponseEntity<?> apiLogin(@RequestBody LoginRequest request) {
         try {
@@ -74,7 +63,6 @@ public class AuthController {
         }
     }
 
-    /** Выход без сессии — просто стираем cookie с токеном (maxAge=0). */
     @GetMapping("/logout")
     public ResponseEntity<Void> logout() {
         return ResponseEntity.status(HttpStatus.FOUND)
@@ -83,7 +71,6 @@ public class AuthController {
             .build();
     }
 
-    /** Проверяет логин/пароль через AuthenticationManager и выпускает JWT с ролями пользователя. */
     private String authenticateAndIssueToken(String username, String password) {
         Authentication authentication = authenticationManager.authenticate(
             new UsernamePasswordAuthenticationToken(username, password));
@@ -92,7 +79,7 @@ public class AuthController {
 
     private String buildCookie(String value, long maxAgeSeconds) {
         return ResponseCookie.from(cookieName, value)
-            .httpOnly(true)      // недоступна из JS -> защита от XSS-кражи токена
+            .httpOnly(true)
             .path("/")
             .sameSite("Lax")
             .maxAge(maxAgeSeconds)

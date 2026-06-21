@@ -9,18 +9,6 @@ import org.springframework.transaction.support.TransactionTemplate;
 import java.util.List;
 import java.util.function.Supplier;
 
-/**
- * Демонстрация проблемы N+1 и её решений.
- *
- * <p>Считаем реальное число SQL-запросов через Hibernate {@link Statistics}:
- * <ul>
- *   <li><b>N+1</b> — 1 запрос на авторов + по запросу на книги каждого автора;</li>
- *   <li><b>JOIN FETCH</b> и <b>@EntityGraph</b> — всё одним запросом.</li>
- * </ul>
- *
- * <p>Чтение обёрнуто в транзакцию: {@code open-in-view=false}, поэтому к ленивой
- * коллекции можно обращаться только внутри неё.
- */
 public final class NPlusOneDemo {
 
     private NPlusOneDemo() {
@@ -51,7 +39,6 @@ public final class NPlusOneDemo {
                 + "а с JOIN FETCH/@EntityGraph — один запрос.");
     }
 
-    /** Обращение к ленивой коллекции каждого автора — здесь и «выстреливают» доп. запросы. */
     private static int countBooks(List<Author> authors) {
         int total = 0;
         for (Author a : authors) {
@@ -61,7 +48,6 @@ public final class NPlusOneDemo {
         return total;
     }
 
-    /** Считает, сколько SQL-запросов выполнилось за время операции. */
     private static void measure(String name, Statistics stats, Supplier<?> action) {
         System.out.println("--- " + name + " ---");
         long before = stats.getPrepareStatementCount();

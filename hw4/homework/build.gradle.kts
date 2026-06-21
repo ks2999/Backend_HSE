@@ -25,7 +25,6 @@ dependencies {
     annotationProcessor("org.projectlombok:lombok")
 }
 
-// главный класс с примерами
 springBoot {
     mainClass.set("org.example.jpa.JdbcExamplesInJpa")
 }

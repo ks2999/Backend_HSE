@@ -5,9 +5,6 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-/**
- * Сущность для демонстрации аудита. Сами аудит-поля унаследованы от {@link Auditable}.
- */
 @Entity
 @Table(name = "articles")
 @Getter

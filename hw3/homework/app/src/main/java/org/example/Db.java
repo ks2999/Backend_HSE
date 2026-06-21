@@ -7,14 +7,6 @@ import jakarta.persistence.Persistence;
 import java.util.HashMap;
 import java.util.Map;
 
-/**
- * Параметры подключения и фабрика {@link EntityManagerFactory}.
- *
- * <p>URL/логин/пароль берутся из переменных окружения {@code DB_URL},
- * {@code DB_USER}, {@code DB_PASSWORD}. По умолчанию — {@code localhost:5433}
- * (порт намеренно 5433, чтобы не конфликтовать с локальным PostgreSQL на 5432).
- * Внутри docker-compose значения переопределяются на {@code postgres:5432}.
- */
 public final class Db {
 
     public static final String URL =
@@ -25,7 +17,6 @@ public final class Db {
     private Db() {
     }
 
-    /** Создаёт EntityManagerFactory, подставляя адрес БД из окружения. */
     public static EntityManagerFactory buildEntityManagerFactory() {
         Map<String, Object> overrides = new HashMap<>();
         overrides.put("hibernate.connection.url", URL);
@@ -34,10 +25,6 @@ public final class Db {
         return Persistence.createEntityManagerFactory("homework-pu", overrides);
     }
 
-    /**
-     * Полная очистка таблиц перед демонстрацией, чтобы повторные запуски
-     * давали одинаковый результат (схему уже создал Hibernate через hbm2ddl).
-     */
     public static void reset(EntityManagerFactory emf) {
         EntityManager em = emf.createEntityManager();
         try {

@@ -5,9 +5,6 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Покупатель. Связь One-to-Many с {@link Order}.
- */
 @Entity
 @Table(name = "customers")
 public class Customer {
@@ -19,7 +16,6 @@ public class Customer {
     @Column(name = "name", nullable = false)
     private String name;
 
-    // Один покупатель — много заказов.
     @OneToMany(mappedBy = "customer", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 

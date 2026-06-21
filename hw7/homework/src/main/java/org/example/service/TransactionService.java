@@ -23,7 +23,6 @@ public class TransactionService {
     private final MeterRegistry meterRegistry;
     private final Tracer tracer;
 
-
     public record Decision(String branch, String outcome, String message) {
     }
 

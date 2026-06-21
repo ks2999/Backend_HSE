@@ -5,17 +5,6 @@ import jakarta.persistence.EntityManagerFactory;
 
 import java.math.BigDecimal;
 
-/**
- * Демонстрация ACID на переводе денег между счетами в рамках одной транзакции.
- *
- * <ul>
- *   <li><b>A (атомарность)</b> — перевод выполняется целиком или не выполняется
- *       вовсе: при ошибке делается ROLLBACK и оба счёта остаются нетронутыми;</li>
- *   <li><b>C (согласованность)</b> — суммарный баланс не меняется;</li>
- *   <li><b>I (изоляция)</b> — см. {@link IsolationDemo};</li>
- *   <li><b>D (долговечность)</b> — после COMMIT данные сохранены в БД на диск.</li>
- * </ul>
- */
 public final class AcidDemo {
 
     private AcidDemo() {
@@ -29,13 +18,11 @@ public final class AcidDemo {
         System.out.printf("Старт:   Alice=%s, Bob=%s%n",
             money(balance(emf, alice)), money(balance(emf, bob)));
 
-        // Успешный перевод: 300 уходят со счёта Alice на счёт Bob.
         transfer(emf, alice, bob, new BigDecimal("300"));
         System.out.println("Перевод 300 (Alice → Bob): успех.");
         System.out.printf("         Alice=%s, Bob=%s%n",
             money(balance(emf, alice)), money(balance(emf, bob)));
 
-        // Перевод сверх остатка: транзакция откатывается, балансы не меняются.
         try {
             transfer(emf, alice, bob, new BigDecimal("100000"));
         } catch (IllegalStateException e) {
@@ -50,7 +37,6 @@ public final class AcidDemo {
         System.out.println();
     }
 
-    /** Перевод суммы в одной транзакции: списываем у одного, начисляем другому. */
     private static void transfer(EntityManagerFactory emf, long fromId, long toId, BigDecimal amount) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -60,14 +46,13 @@ public final class AcidDemo {
             Account to = em.find(Account.class, toId);
 
             if (from.getBalance().compareTo(amount) < 0) {
-                // бросаем исключение -> попадём в catch -> ROLLBACK, ничего не сохранится
                 throw new IllegalStateException("недостаточно средств");
             }
 
             from.setBalance(from.getBalance().subtract(amount));
             to.setBalance(to.getBalance().add(amount));
 
-            em.getTransaction().commit();   // обе записи фиксируются вместе
+            em.getTransaction().commit();
         } catch (RuntimeException e) {
             if (em.getTransaction().isActive()) {
                 em.getTransaction().rollback();
@@ -100,7 +85,6 @@ public final class AcidDemo {
         }
     }
 
-    /** Форматирует сумму без хвостовых нулей: 700.00 -> "700". */
     private static String money(BigDecimal v) {
         return v.stripTrailingZeros().toPlainString();
     }

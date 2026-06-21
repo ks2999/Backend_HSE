@@ -31,22 +31,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-/**
- * ДЗ: использовать ВСЕ типы хранилищ + доп.задание — подключить Hazelcast.
- *
- * Одно приложение по очереди обращается к каждому хранилищу (запись + чтение):
- *   1) PostgreSQL  — OLTP, реляционная        (JdbcTemplate)
- *   2) ClickHouse  — OLAP, колоночная          (JdbcTemplate, batch insert + агрегаты)
- *   3) Redis       — key-value                 (StringRedisTemplate)
- *   4) MongoDB     — документная               (MongoTemplate)
- *   5) S3 / MinIO  — объектное                 (AWS SDK v2 S3Client)
- *   6) Hazelcast   — in-memory data grid       (embedded, IMap) [доп.задание]
- *
- * Конфигурация всех хранилищ — вручную (@Bean), контекст — AnnotationConfigApplicationContext,
- * чтобы несколько Spring Data модулей в одном приложении не конфликтовали через автоконфигурацию.
- *
- * Параметры подключения берутся из переменных окружения (значения по умолчанию — localhost).
- */
 @Configuration
 public class AllStoragesMain {
 
@@ -68,8 +52,6 @@ public class AllStoragesMain {
                 () -> hazelcastDemo(ctx.getBean(HazelcastInstance.class)));
         }
     }
-
-    // ===================== демо по каждому хранилищу =====================
 
     static void postgresDemo(JdbcTemplate jdbc) {
         jdbc.execute("""
@@ -98,7 +80,6 @@ public class AllStoragesMain {
             ) ENGINE = MergeTree ORDER BY id""");
         jdbc.update("TRUNCATE TABLE events");
 
-        // ClickHouse любит пакетные вставки — заливаем 1000 строк одним batch-ем
         List<Object[]> batch = new ArrayList<>();
         for (long i = 1; i <= 1000; i++) {
             batch.add(new Object[]{i, (i % 2 == 0) ? "even" : "odd"});
@@ -152,8 +133,6 @@ public class AllStoragesMain {
         System.out.println("IMap 'demo' get(greeting) = " + map.get("greeting"));
         System.out.println("IMap 'demo' size = " + map.size());
     }
-
-    // ===================== бины хранилищ =====================
 
     @Bean
     public DataSource postgresDataSource() {
@@ -222,14 +201,11 @@ public class AllStoragesMain {
     public HazelcastInstance hazelcastInstance() {
         Config config = new Config();
         config.setClusterName("dev");
-        // встроенный (embedded) одиночный член — отключаем поиск соседей по сети
         config.getNetworkConfig().getJoin().getMulticastConfig().setEnabled(false);
         config.getNetworkConfig().getJoin().getTcpIpConfig().setEnabled(false);
         config.getJetConfig().setEnabled(false);
         return Hazelcast.newHazelcastInstance(config);
     }
-
-    // ===================== вспомогательное =====================
 
     interface Demo {
         void run() throws Exception;
@@ -237,8 +213,6 @@ public class AllStoragesMain {
 
     static void run(String title, Demo demo) {
         System.out.println("\n===== " + title + " =====");
-        // Несколько попыток: при старте «всё в Docker» хранилища (ClickHouse, Mongo)
-        // прогреваются на пару секунд дольше приложения — ждём и повторяем.
         int maxAttempts = 15;
         for (int attempt = 1; attempt <= maxAttempts; attempt++) {
             try {

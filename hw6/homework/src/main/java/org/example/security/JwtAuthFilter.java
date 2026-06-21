@@ -19,11 +19,6 @@ import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
-/**
- * Достаёт JWT из cookie (браузер) или из заголовка {@code Authorization: Bearer} (API),
- * проверяет его и, если всё хорошо, кладёт аутентификацию в SecurityContext.
- * Состояние на сервере не хранится — всё берётся из токена.
- */
 @Component
 public class JwtAuthFilter extends OncePerRequestFilter {
 
@@ -54,8 +49,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
 
                 SecurityContextHolder.getContext().setAuthentication(authentication);
             } catch (JwtException | IllegalArgumentException ex) {
-                // битый/просроченный токен — просто не аутентифицируем запрос;
-                // защищённые эндпоинты вернут 401/редирект на форму
                 SecurityContextHolder.clearContext();
             }
         }
@@ -63,7 +56,6 @@ public class JwtAuthFilter extends OncePerRequestFilter {
         chain.doFilter(request, response);
     }
 
-    /** Сначала заголовок Authorization, затем cookie. */
     private String resolveToken(HttpServletRequest request) {
         String header = request.getHeader(HEADER);
         if (header != null && header.startsWith(PREFIX)) {

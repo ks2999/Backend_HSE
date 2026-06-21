@@ -4,10 +4,6 @@ import jakarta.persistence.*;
 
 import java.math.BigDecimal;
 
-/**
- * Банковский счёт — используется в демо ACID (перевод денег)
- * и в демо уровней изоляции.
- */
 @Entity
 @Table(name = "accounts")
 public class Account {

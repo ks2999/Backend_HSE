@@ -29,19 +29,18 @@ public class DemoService {
         Span span = tracer.spanBuilder("DemoService.getUsers").startSpan();
         try (Scope ignored = span.makeCurrent()) {
             log.info("Fetching users from database");
-            
+
             List<User> users = userRepository.findAll();
-            
+
             span.setAttribute("users.count", (long) users.size());
             log.info("Fetched {} users", users.size());
-            
 
             Counter.builder("demo.users.fetched.total")
                     .description("Total number of users fetched")
                     .tag("source", "database")
                     .register(meterRegistry)
                     .increment(users.size());
-            
+
             return users;
         } catch (Exception e) {
             span.setStatus(io.opentelemetry.api.trace.StatusCode.ERROR, e.getMessage());

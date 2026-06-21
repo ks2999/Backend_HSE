@@ -6,9 +6,6 @@ import java.time.LocalDate;
 import java.util.HashSet;
 import java.util.Set;
 
-/**
- * Заказ. Many-to-One к {@link Customer} и Many-to-Many к {@link Product}.
- */
 @Entity
 @Table(name = "orders")
 public class Order {
@@ -20,12 +17,10 @@ public class Order {
     @Column(name = "order_date")
     private LocalDate orderDate;
 
-    // Заказ принадлежит одному покупателю.
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
 
-    // Заказ содержит несколько товаров — связь через таблицу order_product.
     @ManyToMany(cascade = {CascadeType.PERSIST, CascadeType.MERGE})
     @JoinTable(
         name = "order_product",

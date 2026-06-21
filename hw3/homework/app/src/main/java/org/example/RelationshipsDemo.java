@@ -12,11 +12,6 @@ import java.time.LocalDate;
 import java.util.Comparator;
 import java.util.List;
 
-/**
- * Демонстрация Hibernate как ORM: маппинг сущностей и связи между ними
- * (One-to-Many, Many-to-One, Many-to-Many), а также три способа выборки —
- * JPQL, native SQL и Criteria API.
- */
 public final class RelationshipsDemo {
 
     private RelationshipsDemo() {
@@ -32,7 +27,6 @@ public final class RelationshipsDemo {
         System.out.println();
     }
 
-    /** Создаём граф объектов и сохраняем его одной транзакцией (каскадом). */
     private static void seed(EntityManagerFactory emf) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -43,7 +37,7 @@ public final class RelationshipsDemo {
 
             Product phone = new Product("Смартфон", new BigDecimal("30000"));
             Product novel = new Product("Роман", new BigDecimal("500"));
-            electronics.addProduct(phone);   // проставляет обе стороны связи
+            electronics.addProduct(phone);
             books.addProduct(novel);
 
             Customer customer = new Customer("Алексей");
@@ -52,7 +46,6 @@ public final class RelationshipsDemo {
             order.addProduct(novel);
             customer.addOrder(order);
 
-            // Достаточно сохранить категории и покупателя — остальное уедет каскадом.
             em.persist(electronics);
             em.persist(books);
             em.persist(customer);
@@ -64,7 +57,6 @@ public final class RelationshipsDemo {
         }
     }
 
-    /** Читаем заказы покупателя через JOIN FETCH (без проблемы N+1 и LazyInit). */
     private static void readGraph(EntityManagerFactory emf) {
         EntityManager em = emf.createEntityManager();
         try {
@@ -76,7 +68,6 @@ public final class RelationshipsDemo {
                 System.out.println("Покупатель: " + c.getName());
                 for (Order o : c.getOrders()) {
                     System.out.println("  Заказ от " + o.getOrderDate() + ":");
-                    // products — это Set, поэтому сортируем для предсказуемого вывода
                     o.getProducts().stream()
                         .sorted(Comparator.comparing(Product::getName))
                         .forEach(p -> System.out.printf("    - %s (%s) [%s]%n",
@@ -90,11 +81,9 @@ public final class RelationshipsDemo {
         }
     }
 
-    /** JPQL-агрегат + поиск через Criteria API. */
     private static void queries(EntityManagerFactory emf) {
         EntityManager em = emf.createEntityManager();
         try {
-            // AVG в JPQL возвращает Double — приводим к двум знакам после запятой.
             Double avg = em.createQuery(
                     "SELECT AVG(p.price) FROM Product p", Double.class)
                 .getSingleResult();

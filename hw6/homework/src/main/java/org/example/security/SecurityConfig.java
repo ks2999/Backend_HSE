@@ -19,16 +19,6 @@ import org.springframework.security.web.authentication.HttpStatusEntryPoint;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.http.HttpStatus;
 
-/**
- * Конфигурация безопасности.
- *
- * <ul>
- *   <li>сессии — {@link SessionCreationPolicy#STATELESS}: Spring не создаёт HTTP-сессию,
- *       а значит и cookie {@code JSESSIONID} не появляется;</li>
- *   <li>аутентификацию выполняет {@link JwtAuthFilter} по JWT (cookie или Bearer);</li>
- *   <li>форма логина и выдача токена — в {@code AuthController} (свой эндпоинт {@code /login}).</li>
- * </ul>
- */
 @Configuration
 @EnableWebSecurity
 public class SecurityConfig {
@@ -38,7 +28,6 @@ public class SecurityConfig {
         return PasswordEncoderFactories.createDelegatingPasswordEncoder();
     }
 
-    /** Демо-пользователи в памяти (как в стартовом проекте семинара). */
     @Bean
     public InMemoryUserDetailsManager userDetailsService(PasswordEncoder encoder) {
         UserDetails user = User.withUsername("user")
@@ -60,10 +49,8 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http, JwtAuthFilter jwtAuthFilter) throws Exception {
         http
-            // токен в cookie + STATELESS => классический CSRF на сессии не применим, отключаем
             .csrf(AbstractHttpConfigurer::disable)
             .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            // свои механизмы входа/выхода вместо стандартных form-login/logout (без JSESSIONID)
             .formLogin(AbstractHttpConfigurer::disable)
             .httpBasic(AbstractHttpConfigurer::disable)
             .logout(AbstractHttpConfigurer::disable)
@@ -73,7 +60,6 @@ public class SecurityConfig {
                 .anyRequest().authenticated()
             )
             .exceptionHandling(e -> e
-                // не аутентифицирован: браузер -> на форму логина; API -> 401
                 .authenticationEntryPoint((request, response, ex) -> {
                     String accept = request.getHeader("Accept");
                     if (accept != null && accept.contains("text/html")) {
@@ -82,7 +68,6 @@ public class SecurityConfig {
                         response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
                     }
                 })
-                // аутентифицирован, но не хватает роли -> 403
                 .accessDeniedHandler((request, response, ex) ->
                     response.setStatus(HttpServletResponse.SC_FORBIDDEN)))
             .addFilterBefore(jwtAuthFilter, UsernamePasswordAuthenticationFilter.class);

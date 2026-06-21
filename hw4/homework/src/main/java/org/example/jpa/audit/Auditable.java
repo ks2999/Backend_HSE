@@ -13,14 +13,6 @@ import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import java.time.Instant;
 
-/**
- * Базовый класс с аудит-полями. Spring Data JPA сам заполняет их через
- * {@link AuditingEntityListener}: даты — текущим временем, авторов — значением
- * из {@code AuditorAware} (см. {@link AuditConfig}).
- *
- * <p>Поля {@code created*} помечены {@code updatable = false} — при изменении
- * сущности они не перезаписываются.
- */
 @MappedSuperclass
 @EntityListeners(AuditingEntityListener.class)
 @Getter

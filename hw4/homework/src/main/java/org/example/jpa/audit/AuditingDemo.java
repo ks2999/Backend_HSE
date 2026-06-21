@@ -2,11 +2,6 @@ package org.example.jpa.audit;
 
 import org.springframework.context.ConfigurableApplicationContext;
 
-/**
- * Демонстрация Spring Data JPA Auditing: при создании заполняются
- * {@code createdBy/createdDate}, при изменении — только {@code lastModified*},
- * а {@code created*} остаются нетронутыми.
- */
 public final class AuditingDemo {
 
     private AuditingDemo() {
@@ -18,14 +13,12 @@ public final class AuditingDemo {
 
         System.out.println("=== Spring Data JPA Auditing ===");
 
-        // создаём от имени alice
         AuditorContext.set("alice");
         Long id = repo.save(new Article("Аудит в Spring Data JPA")).getId();
         print("после создания (пользователь alice)", repo.findById(id).orElseThrow());
 
-        sleep(100);   // чтобы lastModifiedDate заметно отличалась от createdDate
+        sleep(100);
 
-        // изменяем от имени bob
         AuditorContext.set("bob");
         Article article = repo.findById(id).orElseThrow();
         article.setTitle("Аудит в Spring Data JPA (отредактировано)");

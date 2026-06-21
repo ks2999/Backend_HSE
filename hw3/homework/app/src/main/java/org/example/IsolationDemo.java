@@ -9,24 +9,6 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 
-/**
- * Демонстрация уровней изоляции транзакций на примере «неповторяемого чтения»
- * (non-repeatable read).
- *
- * <p>Транзакция T1 дважды читает один и тот же баланс. Между этими чтениями
- * транзакция T2 меняет баланс и делает COMMIT.
- *
- * <ul>
- *   <li><b>READ COMMITTED</b> — второе чтение видит новое значение
- *       (неповторяемое чтение допускается);</li>
- *   <li><b>REPEATABLE READ</b> — T1 работает со снимком данных на момент старта,
- *       поэтому оба чтения совпадают (неповторяемое чтение исключено).</li>
- * </ul>
- *
- * <p>Используется чистый JDBC поверх пула HikariCP — так нагляднее виден
- * контроль над уровнем изоляции и границами транзакций. (В PostgreSQL уровень
- * READ UNCOMMITTED работает как READ COMMITTED, «грязное чтение» невозможно.)
- */
 public final class IsolationDemo {
 
     private IsolationDemo() {
@@ -48,8 +30,6 @@ public final class IsolationDemo {
         resetBalance(ds, accId, new BigDecimal("1000"));
         System.out.println("--- " + levelName + " ---");
 
-        // T2: спустя время меняет баланс и коммитит — это происходит «между»
-        // двумя чтениями транзакции T1.
         Thread writer = new Thread(() -> {
             try {
                 Thread.sleep(700);
@@ -74,10 +54,10 @@ public final class IsolationDemo {
 
             writer.start();
 
-            BigDecimal r1 = readBalance(r, accId);   // первый SELECT задаёт снимок при REPEATABLE READ
+            BigDecimal r1 = readBalance(r, accId);
             System.out.println("  T1: первое чтение      balance=" + plain(r1));
 
-            Thread.sleep(1500);                       // ждём, пока T2 успеет закоммитить
+            Thread.sleep(1500);
 
             BigDecimal r2 = readBalance(r, accId);
             System.out.println("  T1: повторное чтение   balance=" + plain(r2));

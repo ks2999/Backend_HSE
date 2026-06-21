@@ -33,7 +33,6 @@ tasks.test {
     }
 }
 
-// Кодировка комментариев JavaDoc — UTF-8 (иначе кириллица «ломается»)
 tasks.withType<Javadoc> {
     options.encoding = "UTF-8"
     (options as StandardJavadocDocletOptions).charSet = "UTF-8"

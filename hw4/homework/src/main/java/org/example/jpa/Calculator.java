@@ -3,12 +3,6 @@ package org.example.jpa;
 import jakarta.persistence.*;
 import lombok.*;
 
-/**
- * Вспомогательная сущность для примеров аномалий сериализации
- * (anomalyExample / notAnomalyExample). В JDBC-версии это была таблица
- * calculator(class, value), создаваемая руками; здесь её создаёт Hibernate.
- * Поле названо clazz/amount, чтобы не конфликтовать с зарезервированными словами.
- */
 @Entity
 @Table(name = "calculator")
 @Getter

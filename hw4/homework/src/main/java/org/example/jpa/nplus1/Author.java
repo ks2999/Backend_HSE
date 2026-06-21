@@ -8,11 +8,6 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Автор и его книги — связь One-to-Many. Коллекция {@code books} ленивая
- * (по умолчанию для {@code @OneToMany}), поэтому обращение к ней в цикле
- * порождает проблему N+1.
- */
 @Entity
 @Table(name = "authors")
 @Getter

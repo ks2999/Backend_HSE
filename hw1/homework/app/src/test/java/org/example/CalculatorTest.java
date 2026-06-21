@@ -8,9 +8,6 @@ import org.junit.jupiter.params.provider.CsvSource;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 
-/**
- * Модульные тесты {@link Calculator} на JUnit 5.
- */
 class CalculatorTest {
 
     @Test

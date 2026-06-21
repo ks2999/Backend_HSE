@@ -11,7 +11,7 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.postgresql:postgresql:42.7.7")
-    
+
     implementation("org.springframework.boot:spring-boot-starter-actuator")
     implementation("io.micrometer:micrometer-registry-prometheus")
 
@@ -21,9 +21,9 @@ dependencies {
 
     implementation("org.projectlombok:lombok:1.18.30")
     annotationProcessor("org.projectlombok:lombok:1.18.30")
-    
+
     implementation("net.logstash.logback:logstash-logback-encoder:7.4")
-    
+
     testImplementation("org.springframework.boot:spring-boot-starter-test")
 }
 

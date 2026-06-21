@@ -5,9 +5,6 @@ import jakarta.persistence.*;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Категория товаров. Связь One-to-Many с {@link Product}.
- */
 @Entity
 @Table(name = "categories")
 public class Category {
@@ -19,7 +16,6 @@ public class Category {
     @Column(name = "name", nullable = false)
     private String name;
 
-    // Одна категория — много товаров. Каскад + удаление "осиротевших" товаров.
     @OneToMany(mappedBy = "category", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Product> products = new ArrayList<>();
 

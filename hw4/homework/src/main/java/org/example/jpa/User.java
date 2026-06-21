@@ -3,9 +3,6 @@ package org.example.jpa;
 import jakarta.persistence.*;
 import lombok.*;
 
-/**
- * Сущность для таблицы users(id, name, about) — та же модель, что и в JDBC-примерах.
- */
 @Entity
 @Table(name = "users")
 @Getter
@@ -30,7 +27,6 @@ public class User {
         this.about = about;
     }
 
-    // JPA lifecycle-колбэки — аналог "побочных эффектов", наглядно видно момент INSERT/UPDATE/DELETE
     @PrePersist
     void prePersist() { System.out.println("INSERT " + name); }
 

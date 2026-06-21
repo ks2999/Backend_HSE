@@ -14,10 +14,6 @@ import java.util.Collection;
 import java.util.Date;
 import java.util.List;
 
-/**
- * Генерация и проверка JWT (алгоритм HS256).
- * Токен несёт {@code sub} (имя пользователя) и claim {@code roles} (список ролей).
- */
 @Component
 public class JwtService {
 
@@ -31,12 +27,10 @@ public class JwtService {
         this.expirationMs = expirationMinutes * 60_000;
     }
 
-    /** Срок жизни токена в секундах — для maxAge cookie. */
     public long getExpirationSeconds() {
         return expirationMs / 1000;
     }
 
-    /** Создаёт подписанный токен для пользователя с его ролями. */
     public String generateToken(String username, Collection<? extends GrantedAuthority> authorities) {
         List<String> roles = authorities.stream().map(GrantedAuthority::getAuthority).toList();
         Date now = new Date();
@@ -49,7 +43,6 @@ public class JwtService {
             .compact();
     }
 
-    /** Проверяет подпись и срок действия; возвращает claims. Бросает JwtException при невалидном токене. */
     public Claims parse(String token) {
         return Jwts.parser()
             .verifyWith(key)
@@ -58,7 +51,6 @@ public class JwtService {
             .getPayload();
     }
 
-    /** Извлекает роли из токена как Spring-овые authorities. */
     @SuppressWarnings("unchecked")
     public List<SimpleGrantedAuthority> extractAuthorities(Claims claims) {
         List<String> roles = claims.get("roles", List.class);
