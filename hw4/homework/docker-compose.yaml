@@ -1,0 +1,48 @@
+# Инфраструктура для ДЗ: одна PostgreSQL + pgAdmin.
+# Таблицы создаёт сам Hibernate (ddl-auto=update) из @Entity, поэтому flyway/liquibase не нужны.
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: s4-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    networks:
+      - pg_network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mydatabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: s4-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - pg_network
+
+volumes:
+  postgres_data:
+  pgadmin_data:
+
+networks:
+  pg_network:
+    driver: bridge

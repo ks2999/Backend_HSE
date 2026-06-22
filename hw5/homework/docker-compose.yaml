@@ -1,0 +1,119 @@
+# Все хранилища для ДЗ. Hazelcast в compose НЕ нужен — он работает embedded внутри приложения.
+# Схемы таблиц приложение создаёт само (CREATE TABLE IF NOT EXISTS), миграции не требуются.
+#
+# Явное имя проекта: иначе Compose берёт имя по папке ("homework") и пересекается
+# с другими ДЗ, у которых папка тоже называется homework.
+name: seminar5-hw
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: s5-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5432:5432"
+    networks: [storages]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mydatabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4:latest
+    container_name: s5-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_CONFIG_SERVER_MODE: "False"
+    ports:
+      - "5050:80"
+    volumes:
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks: [storages]
+
+  clickhouse:
+    image: clickhouse/clickhouse-server:latest
+    container_name: s5-clickhouse
+    environment:
+      CLICKHOUSE_USER: admin
+      CLICKHOUSE_PASSWORD: password
+      CLICKHOUSE_DB: mydatabase
+      CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
+    ports:
+      - "8123:8123"   # HTTP (JDBC)
+      - "9000:9000"   # native
+    ulimits:
+      nofile: { soft: 262144, hard: 262144 }
+    networks: [storages]
+
+  redis:
+    image: redis:latest
+    container_name: s5-redis
+    ports:
+      - "6379:6379"
+    networks: [storages]
+
+  mongodb:
+    image: mongo:latest
+    container_name: s5-mongo
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: admin
+      MONGO_INITDB_ROOT_PASSWORD: password
+      MONGO_INITDB_DATABASE: mydatabase
+    ports:
+      - "27017:27017"
+    networks: [storages]
+
+  minio:
+    image: quay.io/minio/minio:latest
+    container_name: s5-minio
+    environment:
+      MINIO_ROOT_USER: minioAccessKey
+      MINIO_ROOT_PASSWORD: minioSecretKey
+    ports:
+      - "9090:9000"   # S3 API
+      - "9091:9001"   # web-консоль
+    command: ["server", "--console-address", ":9001", "/data"]
+    networks: [storages]
+
+  # Само приложение: собирается из исходников и по очереди ходит во ВСЕ хранилища.
+  # Адреса хранилищ передаются через ENV — внутри сети это docker-имена сервисов.
+  app:
+    build: .
+    container_name: s5-app
+    environment:
+      PG_URL: jdbc:postgresql://postgres:5432/mydatabase
+      PG_USER: admin
+      PG_PASSWORD: password
+      CH_URL: jdbc:clickhouse://clickhouse:8123/mydatabase?compress=false
+      CH_USER: admin
+      CH_PASSWORD: password
+      REDIS_HOST: redis
+      REDIS_PORT: "6379"
+      MONGO_URI: mongodb://admin:password@mongodb:27017/mydatabase?authSource=admin
+      S3_ENDPOINT: http://minio:9000
+      S3_ACCESS_KEY: minioAccessKey
+      S3_SECRET_KEY: minioSecretKey
+    depends_on:
+      postgres:
+        condition: service_healthy
+      clickhouse:
+        condition: service_started
+      redis:
+        condition: service_started
+      mongodb:
+        condition: service_started
+      minio:
+        condition: service_started
+    networks: [storages]
+
+networks:
+  storages:
+    driver: bridge
