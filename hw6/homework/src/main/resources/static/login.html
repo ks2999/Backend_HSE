@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Вход</title>
+    <style>
+        body { font-family: sans-serif; max-width: 360px; margin: 60px auto; }
+        label { display: block; margin: 10px 0 4px; }
+        input { width: 100%; padding: 8px; box-sizing: border-box; }
+        button { margin-top: 16px; padding: 8px 16px; }
+        .error { color: #c0392b; }
+        .ok { color: #27ae60; }
+        .hint { color: #777; font-size: 13px; margin-top: 24px; }
+    </style>
+</head>
+<body>
+<h2>Вход в систему</h2>
+
+<div id="message"></div>
+
+<!-- Обычная форма: POST /login (x-www-form-urlencoded).
+     Сервер в ответ кладёт JWT в cookie ACCESS_TOKEN, а не JSESSIONID. -->
+<form action="/login" method="post">
+    <label for="username">Имя пользователя</label>
+    <input type="text" id="username" name="username" autocomplete="username"/>
+
+    <label for="password">Пароль</label>
+    <input type="password" id="password" name="password" autocomplete="current-password"/>
+
+    <button type="submit">Войти</button>
+</form>
+
+<p class="hint">Демо-пользователи: <code>user / password</code>, <code>admin / admin</code>.</p>
+
+<script>
+    const params = new URLSearchParams(window.location.search);
+    const box = document.getElementById('message');
+    if (params.has('logout')) {
+        box.className = 'ok';
+        box.textContent = 'Вы вышли — токен удалён.';
+    }
+    if (params.has('error')) {
+        box.className = 'error';
+        box.textContent = 'Неверное имя пользователя или пароль.';
+    }
+</script>
+</body>
+</html>

@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <title>Главная</title>
+    <style>
+        body { font-family: sans-serif; max-width: 480px; margin: 60px auto; }
+        .card { border: 1px solid #ddd; border-radius: 8px; padding: 16px 20px; }
+        code { background: #f4f4f4; padding: 1px 4px; border-radius: 3px; }
+        a { color: #2980b9; }
+    </style>
+</head>
+<body>
+<h1>Добро пожаловать!</h1>
+
+<div class="card">
+    <p>Вы аутентифицированы по <b>JWT</b> из cookie <code>ACCESS_TOKEN</code>
+       — серверной сессии и <code>JSESSIONID</code> здесь нет.</p>
+    <p id="who">Загружаю данные пользователя…</p>
+</div>
+
+<p><a href="/logout">Выйти</a></p>
+
+<script>
+    // cookie HttpOnly недоступна из JS, но браузер сам отправит её на /me
+    fetch('/me')
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            document.getElementById('who').innerHTML =
+                'Пользователь: <b>' + data.username + '</b><br>Роли: <code>' + data.roles.join(', ') + '</code>';
+        })
+        .catch(() => { window.location = '/login.html'; });
+</script>
+</body>
+</html>
