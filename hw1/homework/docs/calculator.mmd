@@ -1,0 +1,17 @@
+%% Логика разбора выражения в Main.evaluate
+flowchart TD
+    A([Аргументы командной строки]) --> B{2 аргумента<br/>и первый = factorial?}
+    B -- да --> F[Calculator.factorial n]
+    B -- нет --> C{3 аргумента<br/>a op b?}
+    C -- нет --> E[Ошибка: неверное число аргументов]
+    C -- да --> D{Какая операция op?}
+    D -- "+" --> ADD[Calculator.add]
+    D -- "-" --> SUB[Calculator.subtract]
+    D -- "*" --> MUL[Calculator.multiply]
+    D -- "/" --> DIV[Calculator.divide]
+    D -- другое --> E2[Ошибка: неизвестная операция]
+    F --> R([Вывод результата])
+    ADD --> R
+    SUB --> R
+    MUL --> R
+    DIV --> R

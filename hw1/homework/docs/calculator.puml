@@ -1,0 +1,25 @@
+@startuml calculator
+title Калькулятор — диаграмма классов
+
+class Main {
+  + {static} main(args: String[]) : void
+  ~ {static} evaluate(args: String[]) : String
+}
+
+class Calculator <<utility>> {
+  + {static} add(a: int, b: int) : int
+  + {static} subtract(a: int, b: int) : int
+  + {static} multiply(a: int, b: int) : int
+  + {static} divide(a: int, b: int) : double
+  + {static} factorial(n: int) : long
+  + {static} addOld(a: int, b: int) : int <<deprecated>>
+}
+
+Main --> Calculator : вызывает операции
+
+note right of Calculator
+  divide  -> ArithmeticException при b == 0
+  factorial -> IllegalArgumentException при n < 0
+end note
+
+@enduml

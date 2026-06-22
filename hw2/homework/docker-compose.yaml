@@ -1,0 +1,133 @@
+# ДЗ: 2 PostgreSQL в РАЗНЫХ сетях + 1 pgAdmin (видит обе) +
+#     2 сервиса Flyway (по одному на БД) + приложение на HikariCP (тоже видит обе).
+#
+# Идея с сетями:
+#   - postgres1 живёт только в net1
+#   - postgres2 живёт только в net2
+#   => базы изолированы друг от друга и НЕ видят друг друга.
+#   - pgadmin и app подключены К ОБЕИМ сетям, поэтому видят обе базы.
+#   - flyway1 сидит в net1 (мигрирует postgres1), flyway2 — в net2 (мигрирует postgres2).
+
+services:
+  postgres1:
+    image: postgres:15
+    container_name: hw-postgres1
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: users_db
+    ports:
+      - "5432:5432"        # доступ с хоста: localhost:5432
+    volumes:
+      - pg1_data:/var/lib/postgresql/data
+    networks:
+      - net1
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d users_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  postgres2:
+    image: postgres:15
+    container_name: hw-postgres2
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: products_db
+    ports:
+      - "5433:5432"        # доступ с хоста: localhost:5433
+    volumes:
+      - pg2_data:/var/lib/postgresql/data
+    networks:
+      - net2
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d products_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: hw-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_CONFIG_SERVER_MODE: "False"          # десктоп-режим, без логина
+    ports:
+      - "5050:80"          # UI: http://127.0.0.1:5050
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro   # обе БД зарегистрированы заранее
+    networks:
+      - net1               # <- подключён к ОБЕИМ сетям,
+      - net2               #    поэтому достаёт и postgres1, и postgres2
+    depends_on:
+      postgres1:
+        condition: service_healthy
+      postgres2:
+        condition: service_healthy
+
+  flyway1:
+    image: flyway/flyway:10.10.0
+    container_name: hw-flyway1
+    volumes:
+      - ./migrations/db1:/flyway/sql
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres1:5432/users_db
+      FLYWAY_USER: admin
+      FLYWAY_PASSWORD: password
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      FLYWAY_CONNECT_RETRIES: "10"
+    networks:
+      - net1
+    depends_on:
+      postgres1:
+        condition: service_healthy
+    command: ["migrate"]
+
+  flyway2:
+    image: flyway/flyway:10.10.0
+    container_name: hw-flyway2
+    volumes:
+      - ./migrations/db2:/flyway/sql
+    environment:
+      FLYWAY_URL: jdbc:postgresql://postgres2:5432/products_db
+      FLYWAY_USER: admin
+      FLYWAY_PASSWORD: password
+      FLYWAY_LOCATIONS: filesystem:/flyway/sql
+      FLYWAY_CONNECT_RETRIES: "10"
+    networks:
+      - net2
+    depends_on:
+      postgres2:
+        condition: service_healthy
+    command: ["migrate"]
+
+  app:
+    build: ./app
+    container_name: hw-app
+    environment:
+      DB1_URL: jdbc:postgresql://postgres1:5432/users_db
+      DB2_URL: jdbc:postgresql://postgres2:5432/products_db
+      DB_USER: admin
+      DB_PASSWORD: password
+    networks:
+      - net1               # <- тоже в обеих сетях, чтобы дотянуться до обеих баз
+      - net2
+    depends_on:
+      flyway1:
+        condition: service_completed_successfully
+      flyway2:
+        condition: service_completed_successfully
+
+volumes:
+  pg1_data:
+  pg2_data:
+  pgadmin_data:
+
+networks:
+  net1:
+    driver: bridge
+  net2:
+    driver: bridge

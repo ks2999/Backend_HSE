@@ -1,0 +1,24 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "postgres1 (users_db)",
+      "Group": "Homework",
+      "Host": "postgres1",
+      "Port": 5432,
+      "MaintenanceDB": "users_db",
+      "Username": "admin",
+      "SSLMode": "prefer",
+      "Comment": "Первая БД, сеть net1"
+    },
+    "2": {
+      "Name": "postgres2 (products_db)",
+      "Group": "Homework",
+      "Host": "postgres2",
+      "Port": 5432,
+      "MaintenanceDB": "products_db",
+      "Username": "admin",
+      "SSLMode": "prefer",
+      "Comment": "Вторая БД, сеть net2"
+    }
+  }
+}

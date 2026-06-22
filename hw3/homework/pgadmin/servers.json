@@ -1,0 +1,14 @@
+{
+  "Servers": {
+    "1": {
+      "Name": "mydatabase",
+      "Group": "Homework",
+      "Host": "postgres",
+      "Port": 5432,
+      "MaintenanceDB": "mydatabase",
+      "Username": "admin",
+      "SSLMode": "prefer",
+      "Comment": "Seminar 3 — Hibernate / ACID / уровни изоляции"
+    }
+  }
+}

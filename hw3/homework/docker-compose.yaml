@@ -1,0 +1,71 @@
+# ДЗ семинара 3 — Hibernate / ACID / уровни изоляции.
+#
+#   - postgres : одна БД mydatabase (схему создаёт Hibernate через hbm2ddl=update);
+#   - pgadmin  : веб-интерфейс, БД зарегистрирована заранее (servers.json);
+#   - app      : Java-приложение, прогоняет три демонстрации и завершает работу.
+#
+# На хост Postgres проброшен на порт 5433 (а не 5432), чтобы не конфликтовать
+# с локально установленным PostgreSQL. Внутри сети контейнеры ходят на postgres:5432.
+#
+# Явное имя проекта: иначе Compose берёт имя по папке ("homework") и пересекается
+# с другими ДЗ, у которых папка тоже называется homework.
+name: seminar3-hw
+
+services:
+  postgres:
+    image: postgres:15
+    container_name: hw3-postgres
+    environment:
+      POSTGRES_USER: admin
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: mydatabase
+    ports:
+      - "5433:5432"        # доступ с хоста: localhost:5433
+    volumes:
+      - pg_data:/var/lib/postgresql/data
+    networks:
+      - pg_net
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U admin -d mydatabase"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+  pgadmin:
+    image: dpage/pgadmin4
+    container_name: hw3-pgadmin
+    environment:
+      PGADMIN_DEFAULT_EMAIL: admin@admin.com
+      PGADMIN_DEFAULT_PASSWORD: password
+      PGADMIN_CONFIG_SERVER_MODE: "False"          # десктоп-режим, без логина
+    ports:
+      - "5050:80"          # UI: http://127.0.0.1:5050
+    volumes:
+      - pgadmin_data:/var/lib/pgadmin
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
+    networks:
+      - pg_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  app:
+    build: ./app
+    container_name: hw3-app
+    environment:
+      DB_URL: jdbc:postgresql://postgres:5432/mydatabase
+      DB_USER: admin
+      DB_PASSWORD: password
+    networks:
+      - pg_net
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+volumes:
+  pg_data:
+  pgadmin_data:
+
+networks:
+  pg_net:
+    driver: bridge
