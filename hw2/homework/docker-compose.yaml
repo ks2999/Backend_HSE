@@ -1,13 +1,3 @@
-# ДЗ: 2 PostgreSQL в РАЗНЫХ сетях + 1 pgAdmin (видит обе) +
-#     2 сервиса Flyway (по одному на БД) + приложение на HikariCP (тоже видит обе).
-#
-# Идея с сетями:
-#   - postgres1 живёт только в net1
-#   - postgres2 живёт только в net2
-#   => базы изолированы друг от друга и НЕ видят друг друга.
-#   - pgadmin и app подключены К ОБЕИМ сетям, поэтому видят обе базы.
-#   - flyway1 сидит в net1 (мигрирует postgres1), flyway2 — в net2 (мигрирует postgres2).
-
 services:
   postgres1:
     image: postgres:15
@@ -17,7 +7,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: users_db
     ports:
-      - "5432:5432"        # доступ с хоста: localhost:5432
+      - "5432:5432"
     volumes:
       - pg1_data:/var/lib/postgresql/data
     networks:
@@ -36,7 +26,7 @@ services:
       POSTGRES_PASSWORD: password
       POSTGRES_DB: products_db
     ports:
-      - "5433:5432"        # доступ с хоста: localhost:5433
+      - "5433:5432"
     volumes:
       - pg2_data:/var/lib/postgresql/data
     networks:
@@ -53,15 +43,15 @@ services:
     environment:
       PGADMIN_DEFAULT_EMAIL: admin@admin.com
       PGADMIN_DEFAULT_PASSWORD: password
-      PGADMIN_CONFIG_SERVER_MODE: "False"          # десктоп-режим, без логина
+      PGADMIN_CONFIG_SERVER_MODE: "False"
     ports:
-      - "5050:80"          # UI: http://127.0.0.1:5050
+      - "5050:80"
     volumes:
       - pgadmin_data:/var/lib/pgadmin
-      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro   # обе БД зарегистрированы заранее
+      - ./pgadmin/servers.json:/pgadmin4/servers.json:ro
     networks:
-      - net1               # <- подключён к ОБЕИМ сетям,
-      - net2               #    поэтому достаёт и postgres1, и postgres2
+      - net1
+      - net2
     depends_on:
       postgres1:
         condition: service_healthy
@@ -113,7 +103,7 @@ services:
       DB_USER: admin
       DB_PASSWORD: password
     networks:
-      - net1               # <- тоже в обеих сетях, чтобы дотянуться до обеих баз
+      - net1
       - net2
     depends_on:
       flyway1:

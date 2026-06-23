@@ -8,7 +8,6 @@
     <persistence-unit name="homework-pu" transaction-type="RESOURCE_LOCAL">
         <provider>org.hibernate.jpa.HibernatePersistenceProvider</provider>
 
-        <!-- Сущности этого persistence-unit -->
         <class>org.example.Category</class>
         <class>org.example.Product</class>
         <class>org.example.Customer</class>
@@ -18,19 +17,15 @@
         <properties>
             <property name="hibernate.connection.driver_class" value="org.postgresql.Driver"/>
 
-            <!-- Hibernate сам создаёт/обновляет схему под сущности -->
             <property name="hibernate.hbm2ddl.auto" value="update"/>
             <property name="hibernate.show_sql" value="false"/>
 
-            <!-- Пул соединений HikariCP как connection provider Hibernate -->
             <property name="hibernate.connection.provider_class"
                       value="org.hibernate.hikaricp.internal.HikariCPConnectionProvider"/>
             <property name="hibernate.hikari.minimumIdle" value="2"/>
             <property name="hibernate.hikari.maximumPoolSize" value="5"/>
             <property name="hibernate.hikari.connectionTimeout" value="30000"/>
 
-            <!-- URL/логин/пароль подставляются в коде из переменных окружения,
-                 поэтому одно приложение работает и с хоста, и из контейнера. -->
         </properties>
     </persistence-unit>
 </persistence>

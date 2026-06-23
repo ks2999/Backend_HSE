@@ -1,4 +1,3 @@
--- БД №2 (products_db): начальные данные
 INSERT INTO products (name, price) VALUES
     ('Keyboard', 49.99),
     ('Mouse',    19.99),

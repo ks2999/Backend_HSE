@@ -1,4 +1,3 @@
-# Stage 1: сборка исполняемого jar через Gradle (Spring Boot bootJar)
 FROM gradle:8.8-jdk21 AS build
 WORKDIR /home/gradle/app
 
@@ -7,7 +6,6 @@ COPY src ./src
 
 RUN gradle bootJar --no-daemon
 
-# Stage 2: лёгкий рантайм-образ
 FROM eclipse-temurin:21-jre
 WORKDIR /app
 

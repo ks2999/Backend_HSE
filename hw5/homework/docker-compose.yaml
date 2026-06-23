@@ -1,8 +1,3 @@
-# Все хранилища для ДЗ. Hazelcast в compose НЕ нужен — он работает embedded внутри приложения.
-# Схемы таблиц приложение создаёт само (CREATE TABLE IF NOT EXISTS), миграции не требуются.
-#
-# Явное имя проекта: иначе Compose берёт имя по папке ("homework") и пересекается
-# с другими ДЗ, у которых папка тоже называется homework.
 name: seminar5-hw
 
 services:
@@ -47,8 +42,8 @@ services:
       CLICKHOUSE_DB: mydatabase
       CLICKHOUSE_DEFAULT_ACCESS_MANAGEMENT: "1"
     ports:
-      - "8123:8123"   # HTTP (JDBC)
-      - "9000:9000"   # native
+      - "8123:8123"
+      - "9000:9000"
     ulimits:
       nofile: { soft: 262144, hard: 262144 }
     networks: [storages]
@@ -78,13 +73,11 @@ services:
       MINIO_ROOT_USER: minioAccessKey
       MINIO_ROOT_PASSWORD: minioSecretKey
     ports:
-      - "9090:9000"   # S3 API
-      - "9091:9001"   # web-консоль
+      - "9090:9000"
+      - "9091:9001"
     command: ["server", "--console-address", ":9001", "/data"]
     networks: [storages]
 
-  # Само приложение: собирается из исходников и по очереди ходит во ВСЕ хранилища.
-  # Адреса хранилищ передаются через ENV — внутри сети это docker-имена сервисов.
   app:
     build: .
     container_name: s5-app

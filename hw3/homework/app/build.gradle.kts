@@ -1,6 +1,8 @@
 plugins {
     java
     application
+
+    id("io.spring.dependency-management") version "1.1.6"
 }
 
 group = "org.example"
@@ -10,21 +12,28 @@ repositories {
     mavenCentral()
 }
 
+dependencyManagement {
+    imports {
+        mavenBom("org.springframework.boot:spring-boot-dependencies:3.4.0")
+    }
+}
+
 dependencies {
-    implementation("org.postgresql:postgresql:42.7.7")
+    implementation("org.postgresql:postgresql")
 
-    implementation("org.hibernate.orm:hibernate-core:6.6.2.Final")
-    implementation("org.hibernate.orm:hibernate-hikaricp:6.6.2.Final")
-    implementation("jakarta.persistence:jakarta.persistence-api:3.1.0")
+    implementation("org.hibernate.orm:hibernate-core")
+    implementation("org.hibernate.orm:hibernate-hikaricp")
+    implementation("jakarta.persistence:jakarta.persistence-api")
+    implementation("com.zaxxer:HikariCP")
+    implementation("org.slf4j:slf4j-simple")
 
-    implementation("com.zaxxer:HikariCP:5.1.0")
-
-    implementation("org.slf4j:slf4j-simple:2.0.13")
+    implementation("org.springframework.boot:spring-boot-starter-data-jpa") {
+        exclude(group = "org.springframework.boot", module = "spring-boot-starter-logging")
+    }
 }
 
 application {
     mainClass.set("org.example.Main")
-    applicationDefaultJvmArgs = listOf("-Dorg.jboss.logging.provider=slf4j")
 }
 
 java {

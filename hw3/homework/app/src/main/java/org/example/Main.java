@@ -1,6 +1,7 @@
 package org.example;
 
 import jakarta.persistence.EntityManagerFactory;
+import org.example.spring.SpringDataJpaDemo;
 
 public class Main {
 
@@ -18,6 +19,8 @@ public class Main {
         }
 
         IsolationDemo.run(Db.URL, Db.USER, Db.PASSWORD);
+
+        SpringDataJpaDemo.run();
 
         System.out.println("Готово.");
     }

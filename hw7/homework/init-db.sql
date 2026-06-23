@@ -1,9 +1,7 @@
--- Включение расширений для трейсинга и статистики
 CREATE EXTENSION IF NOT EXISTS pg_stat_statements;
 
--- Представление для просмотра статистики запросов (трейсинг)
 CREATE OR REPLACE VIEW query_stats AS
-SELECT 
+SELECT
     queryid,
     query,
     calls,

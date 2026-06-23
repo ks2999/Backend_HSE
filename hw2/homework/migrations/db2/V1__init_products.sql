@@ -1,4 +1,3 @@
--- БД №2 (products_db): схема товаров
 CREATE TABLE products (
     id         BIGSERIAL PRIMARY KEY,
     name       VARCHAR(100)   NOT NULL,

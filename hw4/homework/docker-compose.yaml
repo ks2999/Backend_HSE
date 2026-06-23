@@ -1,6 +1,3 @@
-# Инфраструктура для ДЗ: одна PostgreSQL + pgAdmin.
-# Таблицы создаёт сам Hibernate (ddl-auto=update) из @Entity, поэтому flyway/liquibase не нужны.
-
 services:
   postgres:
     image: postgres:15

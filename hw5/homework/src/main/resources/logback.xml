@@ -5,7 +5,6 @@
         </encoder>
     </appender>
 
-    <!-- по умолчанию тихо, чтобы вывод демо был читаемым -->
     <root level="WARN">
         <appender-ref ref="STDOUT"/>
     </root>
